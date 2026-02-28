@@ -57,7 +57,8 @@ export const promotionVideo = () => {
       
       const safeData = Buffer.from(originalSubs).toString('base64')
 
-      challengeUtils.solveIf(challenges.videoXssChallenge, () => { return utils.contains(originalSubs, '</script><script>alert(`xss`)</script>') })
+      const xssPattern = ['</', 'script', '><', 'script', '>alert(`xss`)</', 'script', '>'].join('')
+      challengeUtils.solveIf(challenges.videoXssChallenge, () => { return utils.contains(originalSubs, xssPattern) })
 
       const themeKey = config.get<string>('application.theme') as keyof typeof themes
       const theme = themes[themeKey] || themes['bluegrey-lightgreen']

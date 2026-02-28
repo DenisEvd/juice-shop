@@ -12,7 +12,16 @@ export function serveKeyFiles () {
 
     if (!file.includes('/') && !file.includes('..') && !file.includes('\\')) {
       const safePath = path.normalize(file).replace(/^(\.\.[\\/])+/, '')
-      res.sendFile(path.resolve('encryptionkeys/', safePath))
+      const fullPath = path.resolve('encryptionkeys/', safePath)
+      const baseDir = path.resolve('encryptionkeys/')
+      
+      if (!fullPath.startsWith(baseDir)) {
+        res.status(403)
+        next(new Error('Access denied!'))
+        return
+      }
+      
+      res.sendFile(fullPath)
     } else {
       res.status(403)
       next(new Error('File names cannot contain forward slashes!'))

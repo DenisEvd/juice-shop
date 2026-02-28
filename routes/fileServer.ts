@@ -34,11 +34,19 @@ export function servePublicFiles () {
       }
       
       const safePath = path.normalize(file).replace(/^(\.\.[\\/])+/, '')
+      const fullPath = path.resolve('ftp/', safePath)
+      const baseDir = path.resolve('ftp/')
+      
+      if (!fullPath.startsWith(baseDir)) {
+        res.status(403)
+        next(new Error('Access denied!'))
+        return
+      }
 
       challengeUtils.solveIf(challenges.directoryListingChallenge, () => { return file.toLowerCase() === 'acquisitions.md' })
       verifySuccessfulPoisonNullByteExploit(file)
 
-      res.sendFile(path.resolve('ftp/', safePath))
+      res.sendFile(fullPath)
     } else {
       res.status(403)
       next(new Error('Only .md and .pdf files are allowed!'))

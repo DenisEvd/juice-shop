@@ -46,7 +46,12 @@ export function servePublicFiles () {
       challengeUtils.solveIf(challenges.directoryListingChallenge, () => { return file.toLowerCase() === 'acquisitions.md' })
       verifySuccessfulPoisonNullByteExploit(file)
 
-      res.sendFile(fullPath)
+      const stream = require('fs').createReadStream(fullPath)
+      stream.on('error', () => {
+        res.status(404)
+        next(new Error('File not found'))
+      })
+      stream.pipe(res)
     } else {
       res.status(403)
       next(new Error('Only .md and .pdf files are allowed!'))

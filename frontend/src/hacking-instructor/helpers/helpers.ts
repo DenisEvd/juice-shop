@@ -36,16 +36,18 @@ export function waitForInputToHaveValue (inputSelector: string, value: string, o
       let replacementValue = config
       const dangerousProps = ['__proto__', 'constructor', 'prototype']
       
+      const safeGet = (obj: any, prop: string): any => {
+        if (!obj || typeof obj !== 'object') return undefined
+        if (dangerousProps.includes(prop)) return undefined
+        return Object.prototype.hasOwnProperty.call(obj, prop) ? obj[prop] : undefined
+      }
+      
       for (const property of propertyChain) {
-        if (dangerousProps.includes(property)) {
-          console.warn('Blocked dangerous property access:', property)
+        const nextValue = safeGet(replacementValue, property)
+        if (nextValue === undefined) {
           break
         }
-        if (replacementValue && typeof replacementValue === 'object' && Object.prototype.hasOwnProperty.call(replacementValue, property)) {
-          replacementValue = replacementValue[property]
-        } else {
-          break
-        }
+        replacementValue = nextValue
       }
       value = value.replace(options.replacement[0], replacementValue)
     }

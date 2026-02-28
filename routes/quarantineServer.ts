@@ -21,7 +21,12 @@ export function serveQuarantineFiles () {
         return
       }
       
-      res.sendFile(fullPath)
+      const stream = require('fs').createReadStream(fullPath)
+      stream.on('error', () => {
+        res.status(404)
+        next(new Error('File not found'))
+      })
+      stream.pipe(res)
     } else {
       res.status(403)
       next(new Error('File names cannot contain forward slashes!'))

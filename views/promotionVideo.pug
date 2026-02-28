@@ -109,7 +109,8 @@ html(lang='en')
             var subtitle = document.getElementById('subtitle');
             var track = video.addTextTrack('subtitles', subtitle.dataset.label, subtitle.dataset.lang);
             track.mode = "showing";
-            var content = subtitle.dataset.content || subtitle.textContent || '';
+            var base64Content = subtitle.dataset.contentBase64 || '';
+            var content = base64Content ? atob(base64Content) : '';
             quick_and_dirty_vtt_or_srt_parser(content).map(function(cue) {
             track.addCue(cue);
             });

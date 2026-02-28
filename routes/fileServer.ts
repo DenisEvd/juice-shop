@@ -26,6 +26,12 @@ export function servePublicFiles () {
   function verify (file: string, res: Response, next: NextFunction) {
     if (file && (endsWithAllowlistedFileType(file) || (file === 'incident-support.kdbx'))) {
       file = security.cutOffPoisonNullByte(file)
+      
+      if (file.includes('..') || file.includes('/') || file.includes('\\')) {
+        res.status(403)
+        next(new Error('Invalid file path!'))
+        return
+      }
 
       challengeUtils.solveIf(challenges.directoryListingChallenge, () => { return file.toLowerCase() === 'acquisitions.md' })
       verifySuccessfulPoisonNullByteExploit(file)

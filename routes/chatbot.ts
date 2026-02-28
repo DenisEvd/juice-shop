@@ -192,7 +192,8 @@ export const status = function status () {
 
     try {
       bot.addUser(`${user.id}`, username)
-      const greeting = bot.training.state ? bot.greet(`${user.id}`) : `${config.get<string>('application.chatBot.name')} isn't ready at the moment, please wait while I set things up`
+      const botName = config.get<string>('application.chatBot.name').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      const greeting = bot.training.state ? bot.greet(`${user.id}`) : `${botName} isn't ready at the moment, please wait while I set things up`
       res.status(200).json({
         status: bot.training.state,
         body: greeting

@@ -32,11 +32,13 @@ export function servePublicFiles () {
         next(new Error('Invalid file path!'))
         return
       }
+      
+      const safePath = path.normalize(file).replace(/^(\.\.[\\/])+/, '')
 
       challengeUtils.solveIf(challenges.directoryListingChallenge, () => { return file.toLowerCase() === 'acquisitions.md' })
       verifySuccessfulPoisonNullByteExploit(file)
 
-      res.sendFile(path.resolve('ftp/', file))
+      res.sendFile(path.resolve('ftp/', safePath))
     } else {
       res.status(403)
       next(new Error('Only .md and .pdf files are allowed!'))

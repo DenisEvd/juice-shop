@@ -25,7 +25,7 @@ describe('LoginGuard', () => {
   }))
 
   it('should open for authenticated users', inject([LoginGuard], (guard: LoginGuard) => {
-    localStorage.setItem('token', 'TOKEN')
+    localStorage.setItem('token', 'test-token-' + Date.now())
     expect(guard.canActivate()).toBeTrue()
   }))
 
@@ -35,12 +35,11 @@ describe('LoginGuard', () => {
   }))
 
   it('returns payload from decoding a valid JWT', inject([LoginGuard], (guard: LoginGuard) => {
-    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c')
-    expect(guard.tokenDecode()).toEqual({
-      sub: '1234567890',
-      name: 'John Doe',
-      iat: 1516239022
-    })
+    const testPayload = { sub: '1234567890', name: 'John Doe', iat: 1516239022 }
+    const testToken = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })) + '.' + 
+                      btoa(JSON.stringify(testPayload)) + '.test-signature'
+    localStorage.setItem('token', testToken)
+    expect(guard.tokenDecode()).toEqual(testPayload)
   }))
 
   it('returns nothing when decoding an invalid JWT', inject([LoginGuard], (guard: LoginGuard) => {

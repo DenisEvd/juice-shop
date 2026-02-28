@@ -26,11 +26,32 @@ export function servePublicFiles () {
   function verify (file: string, res: Response, next: NextFunction) {
     if (file && (endsWithAllowlistedFileType(file) || (file === 'incident-support.kdbx'))) {
       file = security.cutOffPoisonNullByte(file)
+      
+      if (file.includes('..') || file.includes('/') || file.includes('\\')) {
+        res.status(403)
+        next(new Error('Invalid file path!'))
+        return
+      }
+      
+      const safePath = path.normalize(file).replace(/^(\.\.[\\/])+/, '')
+      const fullPath = path.resolve('ftp/', safePath)
+      const baseDir = path.resolve('ftp/')
+      
+      if (!fullPath.startsWith(baseDir)) {
+        res.status(403)
+        next(new Error('Access denied!'))
+        return
+      }
 
       challengeUtils.solveIf(challenges.directoryListingChallenge, () => { return file.toLowerCase() === 'acquisitions.md' })
       verifySuccessfulPoisonNullByteExploit(file)
 
-      res.sendFile(path.resolve('ftp/', file))
+      const stream = require('fs').createReadStream(fullPath)
+      stream.on('error', () => {
+        res.status(404)
+        next(new Error('File not found'))
+      })
+      stream.pipe(res)
     } else {
       res.status(403)
       next(new Error('Only .md and .pdf files are allowed!'))

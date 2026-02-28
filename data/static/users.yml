@@ -147,7 +147,7 @@
   email: wurstbrot
   username: wurstbrot
   password: 'EinBelegtesBrotMitSchinkenSCHINKEN!'
-  totpSecret: IFTXE3SPOEYVURT2MRYGI52TKJ4HC3KH
+  totpSecret: <%= ENV['TOTP_SECRET_WURSTBROT'] || 'CHANGE_ME_IN_PRODUCTION' %>
   key: timo
   role: 'admin'
   securityQuestion:

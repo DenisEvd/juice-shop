@@ -76,7 +76,7 @@ html(lang='en')
             for (var i = 0; i < lines.length; i++) {
             if (lines[i].indexOf('-->') >= 0) {
             var splitted = lines[i].split(/[ \\t]+-->[ \t]+/);
-            if (splitted.length != 2) {
+            if (splitted.length !== 2) {
             throw 'Error when splitting "-->": ' + lines[i];
             }
             // Already ignoring anything past the "end" timestamp (i.e. cue settings).
@@ -109,7 +109,9 @@ html(lang='en')
             var subtitle = document.getElementById('subtitle');
             var track = video.addTextTrack('subtitles', subtitle.dataset.label, subtitle.dataset.lang);
             track.mode = "showing";
-            quick_and_dirty_vtt_or_srt_parser(subtitle.innerHTML).map(function(cue) {
+            var base64Content = subtitle.dataset.contentBase64 || '';
+            var content = base64Content ? atob(base64Content) : '';
+            quick_and_dirty_vtt_or_srt_parser(content).map(function(cue) {
             track.addCue(cue);
             });
             }

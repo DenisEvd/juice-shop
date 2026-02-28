@@ -10,8 +10,23 @@ export function serveKeyFiles () {
   return ({ params }: Request, res: Response, next: NextFunction) => {
     const file = params.file
 
-    if (!file.includes('/')) {
-      res.sendFile(path.resolve('encryptionkeys/', file))
+    if (!file.includes('/') && !file.includes('..') && !file.includes('\\')) {
+      const safePath = path.normalize(file).replace(/^(\.\.[\\/])+/, '')
+      const fullPath = path.resolve('encryptionkeys/', safePath)
+      const baseDir = path.resolve('encryptionkeys/')
+      
+      if (!fullPath.startsWith(baseDir)) {
+        res.status(403)
+        next(new Error('Access denied!'))
+        return
+      }
+      
+      const stream = require('fs').createReadStream(fullPath)
+      stream.on('error', () => {
+        res.status(404)
+        next(new Error('File not found'))
+      })
+      stream.pipe(res)
     } else {
       res.status(403)
       next(new Error('File names cannot contain forward slashes!'))

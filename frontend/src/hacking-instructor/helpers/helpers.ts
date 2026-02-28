@@ -34,8 +34,20 @@ export function waitForInputToHaveValue (inputSelector: string, value: string, o
       }
       const propertyChain = options.replacement[1].split('.')
       let replacementValue = config
+      const dangerousProps = ['__proto__', 'constructor', 'prototype']
+      
+      const safeGet = (obj: any, prop: string): any => {
+        if (!obj || typeof obj !== 'object') return undefined
+        if (dangerousProps.includes(prop)) return undefined
+        return Object.prototype.hasOwnProperty.call(obj, prop) ? obj[prop] : undefined
+      }
+      
       for (const property of propertyChain) {
-        replacementValue = replacementValue[property]
+        const nextValue = safeGet(replacementValue, property)
+        if (nextValue === undefined) {
+          break
+        }
+        replacementValue = nextValue
       }
       value = value.replace(options.replacement[0], replacementValue)
     }
